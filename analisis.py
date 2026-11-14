@@ -15,7 +15,8 @@ def analizar(df):
     clientes_vip_vs_regular(df)
     metodo_pago_mas_usado(df)
     top5_clientes(df)
-
+    requisitos_reto(df)
+    ventas_por_mes(df)
 
 def ingresos_por_categoria(df):
     print("\n--- 1. INGRESOS POR CATEGORÍA ---")
@@ -63,3 +64,35 @@ def top5_clientes(df):
         .head(5)
     )
     print(top5)
+
+def requisitos_reto(df):
+    print("\n--- REQUISITO DEL RETO: LOC, ILOC Y CONCAT ---")
+
+    # 1. Uso de .loc (selección por etiqueta/condición y nombres de columna)
+    ventas_vip = df.loc[df["segmento_cliente"] == "VIP", ["id_venta", "nombre_cliente", "total"]]
+    print(f"Total de ventas realizadas a clientes VIP (usando .loc): {len(ventas_vip)}")
+
+    # 2. Uso de .iloc (selección por posición numérica: fila 0, columna 'total')
+    primera_venta_id = df.iloc[0, 0]
+    print(f"Primer ID de venta en la tabla unida (usando .iloc[0, 0]): {primera_venta_id}")
+
+    # 3. Uso de pd.concat() (unir verticalmente las 3 ventas más altas y las 3 más bajas)
+    df_ordenado = df.sort_values(by="total", ascending=False)
+    top_3_ventas = df_ordenado.iloc[0:3][["id_venta", "producto", "total"]]
+    bottom_3_ventas = df_ordenado.iloc[-3:][["id_venta", "producto", "total"]]
+
+    extremos_ventas = pd.concat([top_3_ventas, bottom_3_ventas], ignore_index=True)
+    print("\nComparación de las 3 ventas más altas y 3 más bajas (usando pd.concat):")
+    print(extremos_ventas)
+
+
+def ventas_por_mes(df):
+    """Bonus (Sección 10): calcular ventas totales por mes usando to_period('M')."""
+    print("\n--- BONUS: VENTAS TOTALES POR MES ---")
+    df_mes = df.copy()
+    df_mes["mes"] = df_mes["fecha_venta"].dt.to_period("M")
+    resumen_mes = df_mes.groupby("mes")["total"].sum()
+    print(resumen_mes)
+    mes_mayor = resumen_mes.idxmax()
+    valor_mayor = resumen_mes.max()
+    print(f"El mes con mayores ventas fue {mes_mayor} con un total de ${valor_mayor:,.2f}")
